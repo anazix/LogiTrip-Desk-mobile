@@ -1,0 +1,2570 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LogiTrip</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Prompt', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f7ff;
+            color: #333;
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* หน้าจอเลือกโหมด */
+        .mode-selection {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            transition: opacity 0.5s;
+        }
+        
+        .mode-selection.hidden {
+            display: none;
+        }
+        
+        .mode-selection h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .mode-selection p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+        
+        .mode-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 20px;
+            max-width: 800px;
+        }
+        
+        .mode-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            width: 300px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+        
+        .mode-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .mode-card i {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .mode-card h2 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+        
+        .mode-card p {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            margin-bottom: 0;
+        }
+        
+        .app-container {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+            transition: opacity 0.5s;
+        }
+        
+        .app-container.visible {
+            display: block;
+        }
+        
+        /* สไตล์สำหรับโหมดคอมพิวเตอร์ */
+        .desktop-mode .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 100, 0.1);
+            overflow: hidden;
+            height: calc(100vh - 40px);
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .desktop-mode header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .desktop-mode header h1 {
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+        }
+        
+        .desktop-mode .app-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 0;
+        }
+        
+        .desktop-mode .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e0e0e0;
+            min-width: 350px;
+            max-width: 450px;
+            overflow: hidden;
+        }
+        
+        .desktop-mode .right-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* สไตล์สำหรับโหมดโทรศัพท์ */
+        .mobile-mode .container {
+            background-color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .mobile-mode header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .mobile-mode header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .mobile-mode .app-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            flex-direction: column;
+        }
+        
+        .mobile-mode .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .mobile-mode .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        /* ส่วนที่ใช้ร่วมกัน */
+        .left-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #2a5298;
+            font-size: 1.2rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f4ff;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #2a5298;
+            outline: none;
+        }
+        
+        /* Checkbox และส่วนคำนวณค่าน้ำมัน */
+        .calc-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .calc-option input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .calc-option label {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: #2a5298;
+            cursor: pointer;
+        }
+        
+        .fuel-cost-group {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #2a5298;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .fuel-cost-group.show {
+            display: block;
+        }
+        
+        .unit-container {
+            position: relative;
+        }
+        
+        .unit-text {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        
+        .fuel-price-info {
+            background-color: #e8f4ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .fuel-price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .fuel-price-item:last-child {
+            border-bottom: none;
+        }
+        
+        .time-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-input-group {
+            flex: 1;
+            position: relative;
+        }
+        
+        .time-input-group input {
+            padding-left: 50px;
+        }
+        
+        .time-input-group:after {
+            content: attr(data-label);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-weight: 600;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        
+        .time-separator {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2a5298;
+            margin: 0 5px;
+        }
+        
+        .departure-time-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .departure-time-group {
+            flex: 1;
+            position: relative;
+        }
+        
+        .departure-time-group input {
+            padding-left: 50px;
+        }
+        
+        .departure-time-group:after {
+            content: attr(data-label);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-weight: 600;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        
+        .hint-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+            padding-left: 5px;
+        }
+        
+        .stops-section {
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background-color: #2a5298;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1e3c72;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .stops-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px dashed #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+        }
+        
+        .stop-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stop-details {
+            flex-grow: 1;
+        }
+        
+        .stop-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e3c72;
+            margin-bottom: 4px;
+        }
+        
+        .stop-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .stop-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+        
+        .scroll-hint {
+            font-size: 0.85rem;
+            color: #888;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+            padding: 8px;
+            background-color: #f0f7ff;
+            border-radius: 6px;
+        }
+        
+        .results-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .results-controls {
+            margin-bottom: 20px;
+        }
+        
+        .results-display {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 1.05rem;
+        }
+        
+        .result-value {
+            font-weight: 700;
+            color: #1e3c72;
+            font-size: 1.2rem;
+        }
+        
+        .time-display {
+            font-size: 1.2rem;
+        }
+        
+        .arrival-time-display {
+            font-size: 1.2rem;
+            color: #28a745;
+        }
+        
+        .total-time {
+            background-color: #e8f4ff;
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+        
+        .total-time-value {
+            font-size: 1.9rem;
+            margin-left: 10px;
+        }
+        
+        .arrival-time-section {
+            background-color: #e8f4ff;
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+            border: 2px solid #2a5298;
+        }
+        
+        .arrival-label {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        
+        .arrival-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+        
+        .fuel-cost-section {
+            background-color: #f0f8f0;
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #28a745;
+        }
+        
+        .fuel-cost-label {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .fuel-cost-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #28a745;
+            text-align: center;
+        }
+        
+        .fuel-details {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        /* Custom scrollbar */
+        .left-panel-content::-webkit-scrollbar,
+        .stops-list::-webkit-scrollbar,
+        .results-display::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .left-panel-content::-webkit-scrollbar-track,
+        .stops-list::-webkit-scrollbar-track,
+        .results-display::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .left-panel-content::-webkit-scrollbar-thumb,
+        .stops-list::-webkit-scrollbar-thumb,
+        .results-display::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .left-panel-content::-webkit-scrollbar-thumb:hover,
+        .stops-list::-webkit-scrollbar-thumb:hover,
+        .results-display::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* ปุ่มสลับโหมด */
+        .mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #2a5298;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .mode-toggle:hover {
+            background: #1e3c72;
+            transform: scale(1.1);
+        }
+        
+        /* ปรับแต่งสำหรับโทรศัพท์ */
+        @media (max-width: 768px) {
+            .mode-selection h1 {
+                font-size: 1.8rem;
+            }
+            
+            .mode-card {
+                width: 100%;
+                max-width: 300px;
+                padding: 20px;
+            }
+            
+            .mobile-mode .left-panel-content {
+                padding: 15px;
+            }
+            
+            .mobile-mode .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .mobile-mode .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .mobile-mode .buttons-row {
+                flex-wrap: wrap;
+            }
+            
+            .mobile-mode .stop-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .mobile-mode .stop-actions {
+                margin-top: 8px;
+                align-self: flex-end;
+            }
+            
+            .mobile-mode .time-input-container, .mobile-mode .departure-time-container {
+                flex-direction: row;
+            }
+            
+            .mobile-mode header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .mobile-mode .arrival-value, .mobile-mode .fuel-cost-value {
+                font-size: 1.4rem;
+            }
+            
+            .mobile-mode .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .mobile-mode .results-section {
+                padding: 15px;
+            }
+            
+            .mobile-mode .results-display {
+                padding: 15px;
+            }
+            
+            .mobile-mode .result-label, .mobile-mode .result-value {
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-height: 700px) {
+            .form-section, .stops-section {
+                margin-bottom: 15px;
+            }
+            
+            .form-group {
+                margin-bottom: 10px;
+            }
+            
+            input, select {
+                padding: 10px 12px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+            }
+            
+            .stop-item {
+                padding: 10px;
+            }
+            
+            .stops-list {
+                max-height: 150px;
+            }
+        }
+        
+        /* ปุ่มย้อนกลับไปหน้าเลือกโหมด */
+        .back-to-mode {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .back-to-mode:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- หน้าจอเลือกโหมด -->
+    <div class="mode-selection" id="modeSelection">
+        <h1><i class="fas fa-route"></i> LogiTrip</h1>
+        <p>เลือกโหมดการใช้งานที่เหมาะสมกับอุปกรณ์ของคุณ เพื่อประสบการณ์ที่ดีที่สุด</p>
+        
+        <div class="mode-options">
+            <div class="mode-card" id="desktopModeBtn">
+                <i class="fas fa-desktop"></i>
+                <h2>โหมดคอมพิวเตอร์</h2>
+                <p>เหมาะสำหรับหน้าจอขนาดใหญ่ ใช้งานพร้อมแสดงผลข้อมูลทั้งหมดในหน้าเดียว</p>
+            </div>
+            
+            <div class="mode-card" id="mobileModeBtn">
+                <i class="fas fa-mobile-alt"></i>
+                <h2>โหมดโทรศัพท์</h2>
+                <p>ออกแบบสำหรับมือถือ ใช้งานง่ายด้วยการเลื่อนขึ้น-ลง เหมาะกับจอสัมผัส</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; font-size: 0.9rem; opacity: 0.7;">
+            <p>สามารถเปลี่ยนโหมดได้ตลอดเวลาโดยคลิกปุ่มที่มุมล่างขวา</p>
+        </div>
+    </div>
+    
+    <!-- แอพพลิเคชันหลัก -->
+    <div class="app-container" id="appContainer">
+        <!-- ส่วนนี้จะแสดงเมื่อเลือกโหมดคอมพิวเตอร์ -->
+        <div class="desktop-mode" id="desktopMode">
+            <div class="container">
+                <header>
+                    <button class="back-to-mode" id="backToModeDesktop">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1><i class="fas fa-route"></i> LogiTrip</h1>
+                    <p>โหมดคอมพิวเตอร์ - แสดงข้อมูลครบถ้วนในหน้าเดียว</p>
+                </header>
+                
+                <div class="app-content">
+                    <!-- แถบด้านซ้ายสำหรับกรอกข้อมูล -->
+                    <div class="left-panel">
+                        <div class="left-panel-content">
+                            <!-- ข้อมูลการเดินทาง -->
+                            <section class="form-section">
+                                <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> ข้อมูลการเดินทาง</h2>
+                                
+                                <div class="form-group">
+                                    <label for="startPoint"><i class="fas fa-play-circle"></i> จุดเริ่มต้น</label>
+                                    <input type="text" id="startPoint" placeholder="กรอกจุดเริ่มต้น" value="A">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="endPoint"><i class="fas fa-flag-checkered"></i> จุดหมายปลายทาง</label>
+                                    <input type="text" id="endPoint" placeholder="กรอกจุดหมายปลายทาง" value="B">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="departureTime"><i class="fas fa-clock"></i> เวลาออกเดินทาง</label>
+                                    <div class="departure-time-container">
+                                        <div class="departure-time-group" data-label="ชม.">
+                                            <input type="number" id="departureHour" placeholder="0" min="0" max="23">
+                                        </div>
+                                        <div class="time-separator">:</div>
+                                        <div class="departure-time-group" data-label="นาที">
+                                            <input type="number" id="departureMinute" placeholder="0" min="0" max="59">
+                                        </div>
+                                    </div>
+                                    <div class="hint-text">รูปแบบ 24 ชั่วโมง</div>
+                                </div>
+                                
+                                <!-- ตัวเลือกการคำนวณค่าน้ำมัน -->
+                                <div class="calc-option">
+                                    <input type="checkbox" id="useFuelCalc">
+                                    <label for="useFuelCalc">
+                                        <i class="fas fa-gas-pump"></i> คำนวณค่าน้ำมัน
+                                    </label>
+                                </div>
+                                
+                                <!-- ส่วนกรอกข้อมูลสำหรับคำนวณค่าน้ำมัน (ซ่อนไว้ตอนแรก) -->
+                                <div id="fuelCostGroup" class="fuel-cost-group">
+                                    <div class="form-group">
+                                        <label for="distance"><i class="fas fa-road"></i> ระยะทาง (กิโลเมตร)</label>
+                                        <div class="unit-container">
+                                            <input type="number" id="distance" placeholder="0" min="0" step="0.1">
+                                            <span class="unit-text">กม.</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="fuelConsumption"><i class="fas fa-oil-can"></i> อัตราสิ้นเปลืองน้ำมัน</label>
+                                        <div class="unit-container">
+                                            <input type="number" id="fuelConsumption" placeholder="0" min="0" step="0.1">
+                                            <span class="unit-text">กม./ลิตร</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="fuelType"><i class="fas fa-gas-pump"></i> ประเภทน้ำมัน</label>
+                                        <select id="fuelType">
+                                            <option value="95" selected>เบนซิน 95</option>
+                                            <option value="91">เบนซิน 91</option>
+                                            <option value="diesel">ดีเซล</option>
+                                            <option value="e20">แก๊สโซฮอล์ E20</option>
+                                            <option value="e85">แก๊สโซฮอล์ E85</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- แสดงราคาน้ำมันจาก API -->
+                                    <div class="fuel-price-info">
+                                        <div class="fuel-price-item">
+                                            <span>เบนซิน 95:</span>
+                                            <span id="price95">กำลังโหลด...</span>
+                                        </div>
+                                        <div class="fuel-price-item">
+                                            <span>เบนซิน 91:</span>
+                                            <span id="price91">กำลังโหลด...</span>
+                                        </div>
+                                        <div class="fuel-price-item">
+                                            <span>ดีเซล:</span>
+                                            <span id="priceDiesel">กำลังโหลด...</span>
+                                        </div>
+                                        <div class="hint-text">ข้อมูลราคาน้ำมันอัปเดตล่าสุด</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ส่วนกรอกเวลาเดินทาง -->
+                                <div class="form-group">
+                                    <label for="travelTime"><i class="fas fa-hourglass-half"></i> ระยะเวลาเดินทาง</label>
+                                    <div class="time-input-container">
+                                        <div class="time-input-group" data-label="ชม.">
+                                            <input type="number" id="travelHours" placeholder="0" min="0" max="99">
+                                        </div>
+                                        <div class="time-separator">:</div>
+                                        <div class="time-input-group" data-label="นาที">
+                                            <input type="number" id="travelMinutes" placeholder="0" min="0" max="59">
+                                        </div>
+                                    </div>
+                                    <div class="hint-text">เวลาที่ใช้ในการเดินทาง (ไม่รวมจุดแวะพัก)</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="transport"><i class="fas fa-car"></i> วิธีการเดินทาง</label>
+                                    <select id="transport">
+                                        <option value="car" selected>รถยนต์</option>
+                                        <option value="motorcycle">รถจักรยานยนต์</option>
+                                        <option value="public">ขนส่งสาธารณะ</option>
+                                        <option value="walk">เดิน</option>
+                                        <option value="bike">จักรยาน</option>
+                                    </select>
+                                </div>
+                            </section>
+                            
+                            <!-- จุดแวะพัก -->
+                            <section class="stops-section">
+                                <h2 class="section-title"><i class="fas fa-map-pin"></i> จุดแวะพัก</h2>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="stopName"><i class="fas fa-store"></i> ชื่อจุดแวะพัก</label>
+                                        <input type="text" id="stopName" placeholder="เช่น ร้านกาแฟ, ปั๊มน้ำมัน">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stopTime"><i class="fas fa-hourglass-half"></i> เวลาแวะพัก (นาที)</label>
+                                        <input type="number" id="stopTime" placeholder="0" min="0">
+                                    </div>
+                                </div>
+                                
+                                <div class="buttons-row">
+                                    <button class="btn btn-success" id="addStopBtn">
+                                        <i class="fas fa-plus-circle"></i> เพิ่มจุดแวะพัก
+                                    </button>
+                                    <button class="btn btn-secondary" id="clearStopsBtn">
+                                        <i class="fas fa-trash-alt"></i> ล้างทั้งหมด
+                                    </button>
+                                </div>
+                                
+                                <div class="stops-list" id="stopsList">
+                                    <div class="empty-message" id="emptyStopsMessage">
+                                        <i class="fas fa-info-circle"></i> ยังไม่มีจุดแวะพัก
+                                    </div>
+                                </div>
+                                
+                            </section>
+                        </div>
+                    </div>
+                    
+                    <!-- แถบด้านขวาเพื่อแสดงผลลัพธ์ -->
+                    <div class="right-panel">
+                        <section class="results-section">
+                            <div class="results-controls">
+                                <h2 class="section-title"><i class="fas fa-calculator"></i> ผลการคำนวณเวลาเดินทาง</h2>
+                                <div class="buttons-row">
+                                    <button class="btn btn-secondary" id="resetBtn">
+                                        <i class="fas fa-redo-alt"></i> รีเซ็ตทั้งหมด
+                                    </button>
+                                    <button class="btn btn-primary" id="copyResultsBtn">
+                                        <i class="fas fa-copy"></i> คัดลอกผลลัพธ์
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="results-display" id="resultsDisplay">
+                                <div class="result-item">
+                                    <span class="result-label">จุดเริ่มต้น:</span>
+                                    <span class="result-value" id="resultStart">A</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">จุดหมายปลายทาง:</span>
+                                    <span class="result-value" id="resultEnd">B</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">วิธีการเดินทาง:</span>
+                                    <span class="result-value" id="resultTransport">รถยนต์</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">เวลาออกเดินทาง:</span>
+                                    <span class="result-value time-display" id="resultDepartureTime"> </span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">เวลาเดินทางพื้นฐาน:</span>
+                                    <span class="result-value time-display" id="resultBaseTime"> </span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">จำนวนจุดแวะพัก:</span>
+                                    <span class="result-value" id="resultStopsCount">0</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">เวลาพักทั้งหมด:</span>
+                                    <span class="result-value time-display" id="resultTotalStopTime"> </span>
+                                </div>
+                                
+                                <div class="total-time">
+                                    <span>เวลาเดินทางทั้งหมด: </span>
+                                    <span class="total-time-value" id="resultTotalTime"> </span>
+                                </div>
+                                
+                                <div class="arrival-time-section">
+                                    <div class="arrival-label">เวลาถึงโดยประมาณ:</div>
+                                    <div class="arrival-value" id="resultArrivalTime"> </div>
+                                </div>
+                                
+                                <!-- ส่วนแสดงผลค่าน้ำมัน -->
+                                <div id="fuelCostResult" class="fuel-cost-section" style="display: none;">
+                                    <div class="fuel-cost-label">ค่าน้ำมันโดยประมาณ</div>
+                                    <div class="fuel-cost-value" id="resultFuelCost">0 บาท</div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ส่วนนี้จะแสดงเมื่อเลือกโหมดโทรศัพท์ -->
+        <div class="mobile-mode" id="mobileMode">
+            <div class="container">
+                <header>
+                    <button class="back-to-mode" id="backToModeMobile">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1><i class="fas fa-route"></i> LogiTrip</h1>
+                    <p>โหมดโทรศัพท์ - เลื่อนขึ้น-ลงเพื่อใช้งาน</p>
+                </header>
+                
+                <div class="app-content">
+                    <!-- แถบด้านซ้ายสำหรับกรอกข้อมูล -->
+                    <div class="left-panel">
+                        <div class="left-panel-content">
+                            <!-- ข้อมูลการเดินทาง -->
+                            <section class="form-section">
+                                <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> ข้อมูลการเดินทาง</h2>
+                                
+                                <div class="form-group">
+                                    <label for="startPointMobile"><i class="fas fa-play-circle"></i> จุดเริ่มต้น</label>
+                                    <input type="text" id="startPointMobile" placeholder="กรอกจุดเริ่มต้น" value="A">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="endPointMobile"><i class="fas fa-flag-checkered"></i> จุดหมายปลายทาง</label>
+                                    <input type="text" id="endPointMobile" placeholder="กรอกจุดหมายปลายทาง" value="B">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="departureTimeMobile"><i class="fas fa-clock"></i> เวลาออกเดินทาง</label>
+                                    <div class="departure-time-container">
+                                        <div class="departure-time-group" data-label="ชม.">
+                                            <input type="number" id="departureHourMobile" placeholder="0" min="0" max="23">
+                                        </div>
+                                        <div class="time-separator">:</div>
+                                        <div class="departure-time-group" data-label="นาที">
+                                            <input type="number" id="departureMinuteMobile" placeholder="0" min="0" max="59">
+                                        </div>
+                                    </div>
+                                    <div class="hint-text">รูปแบบ 24 ชั่วโมง</div>
+                                </div>
+                                
+                                <!-- ตัวเลือกการคำนวณค่าน้ำมัน -->
+                                <div class="calc-option">
+                                    <input type="checkbox" id="useFuelCalcMobile">
+                                    <label for="useFuelCalcMobile">
+                                        <i class="fas fa-gas-pump"></i> คำนวณค่าน้ำมัน
+                                    </label>
+                                </div>
+                                
+                                <!-- ส่วนกรอกข้อมูลสำหรับคำนวณค่าน้ำมัน (ซ่อนไว้ตอนแรก) -->
+                                <div id="fuelCostGroupMobile" class="fuel-cost-group">
+                                    <div class="form-group">
+                                        <label for="distanceMobile"><i class="fas fa-road"></i> ระยะทาง (กิโลเมตร)</label>
+                                        <div class="unit-container">
+                                            <input type="number" id="distanceMobile" placeholder="0" min="0" step="0.1">
+                                            <span class="unit-text">กม.</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="fuelConsumptionMobile"><i class="fas fa-oil-can"></i> อัตราสิ้นเปลืองน้ำมัน</label>
+                                        <div class="unit-container">
+                                            <input type="number" id="fuelConsumptionMobile" placeholder="0" min="0" step="0.1">
+                                            <span class="unit-text">กม./ลิตร</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="fuelTypeMobile"><i class="fas fa-gas-pump"></i> ประเภทน้ำมัน</label>
+                                        <select id="fuelTypeMobile">
+                                            <option value="95" selected>เบนซิน 95</option>
+                                            <option value="91">เบนซิน 91</option>
+                                            <option value="diesel">ดีเซล</option>
+                                            <option value="e20">แก๊สโซฮอล์ E20</option>
+                                            <option value="e85">แก๊สโซฮอล์ E85</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- แสดงราคาน้ำมันจาก API -->
+                                    <div class="fuel-price-info">
+                                        <div class="fuel-price-item">
+                                            <span>เบนซิน 95:</span>
+                                            <span id="price95Mobile">กำลังโหลด...</span>
+                                        </div>
+                                        <div class="fuel-price-item">
+                                            <span>เบนซิน 91:</span>
+                                            <span id="price91Mobile">กำลังโหลด...</span>
+                                        </div>
+                                        <div class="fuel-price-item">
+                                            <span>ดีเซล:</span>
+                                            <span id="priceDieselMobile">กำลังโหลด...</span>
+                                        </div>
+                                        <div class="hint-text">ข้อมูลราคาน้ำมันอัปเดตล่าสุด</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ส่วนกรอกเวลาเดินทาง -->
+                                <div class="form-group">
+                                    <label for="travelTimeMobile"><i class="fas fa-hourglass-half"></i> ระยะเวลาเดินทาง</label>
+                                    <div class="time-input-container">
+                                        <div class="time-input-group" data-label="ชม.">
+                                            <input type="number" id="travelHoursMobile" placeholder="0" min="0" max="99">
+                                        </div>
+                                        <div class="time-separator">:</div>
+                                        <div class="time-input-group" data-label="นาที">
+                                            <input type="number" id="travelMinutesMobile" placeholder="0" min="0" max="59">
+                                        </div>
+                                    </div>
+                                    <div class="hint-text">เวลาที่ใช้ในการเดินทาง (ไม่รวมจุดแวะพัก)</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="transportMobile"><i class="fas fa-car"></i> วิธีการเดินทาง</label>
+                                    <select id="transportMobile">
+                                        <option value="car" selected>รถยนต์</option>
+                                        <option value="motorcycle">รถจักรยานยนต์</option>
+                                        <option value="public">ขนส่งสาธารณะ</option>
+                                        <option value="walk">เดิน</option>
+                                        <option value="bike">จักรยาน</option>
+                                    </select>
+                                </div>
+                            </section>
+                            
+                            <!-- จุดแวะพัก -->
+                            <section class="stops-section">
+                                <h2 class="section-title"><i class="fas fa-map-pin"></i> จุดแวะพัก</h2>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="stopNameMobile"><i class="fas fa-store"></i> ชื่อจุดแวะพัก</label>
+                                        <input type="text" id="stopNameMobile" placeholder="เช่น ร้านกาแฟ, ปั๊มน้ำมัน">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stopTimeMobile"><i class="fas fa-hourglass-half"></i> เวลาแวะพัก (นาที)</label>
+                                        <input type="number" id="stopTimeMobile" placeholder="0" min="0">
+                                    </div>
+                                </div>
+                                
+                                <div class="buttons-row">
+                                    <button class="btn btn-success" id="addStopBtnMobile">
+                                        <i class="fas fa-plus-circle"></i> เพิ่มจุดแวะพัก
+                                    </button>
+                                    <button class="btn btn-secondary" id="clearStopsBtnMobile">
+                                        <i class="fas fa-trash-alt"></i> ล้างทั้งหมด
+                                    </button>
+                                </div>
+                                
+                                <div class="stops-list" id="stopsListMobile">
+                                    <div class="empty-message" id="emptyStopsMessageMobile">
+                                        <i class="fas fa-info-circle"></i> ยังไม่มีจุดแวะพัก
+                                    </div>
+                                </div>
+                                
+                            </section>
+                        </div>
+                    </div>
+                    
+                    <!-- แถบด้านขวาเพื่อแสดงผลลัพธ์ -->
+                    <div class="right-panel">
+                        <section class="results-section">
+                            <div class="results-controls">
+                                <h2 class="section-title"><i class="fas fa-calculator"></i> ผลการคำนวณเวลาเดินทาง</h2>
+                                <div class="buttons-row">
+                                    <button class="btn btn-secondary" id="resetBtnMobile">
+                                        <i class="fas fa-redo-alt"></i> รีเซ็ตทั้งหมด
+                                    </button>
+                                    <button class="btn btn-primary" id="copyResultsBtnMobile">
+                                        <i class="fas fa-copy"></i> คัดลอกผลลัพธ์
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="results-display" id="resultsDisplayMobile">
+                                <div class="result-item">
+                                    <span class="result-label">จุดเริ่มต้น:</span>
+                                    <span class="result-value" id="resultStartMobile">A</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">จุดหมายปลายทาง:</span>
+                                    <span class="result-value" id="resultEndMobile">B</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">วิธีการเดินทาง:</span>
+                                    <span class="result-value" id="resultTransportMobile">รถยนต์</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">เวลาออกเดินทาง:</span>
+                                    <span class="result-value time-display" id="resultDepartureTimeMobile"> </span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">เวลาเดินทางพื้นฐาน:</span>
+                                    <span class="result-value time-display" id="resultBaseTimeMobile"> </span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">จำนวนจุดแวะพัก:</span>
+                                    <span class="result-value" id="resultStopsCountMobile">0</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">เวลาพักทั้งหมด:</span>
+                                    <span class="result-value time-display" id="resultTotalStopTimeMobile"> </span>
+                                </div>
+                                
+                                <div class="total-time">
+                                    <span>เวลาเดินทางทั้งหมด: </span>
+                                    <span class="total-time-value" id="resultTotalTimeMobile"> </span>
+                                </div>
+                                
+                                <div class="arrival-time-section">
+                                    <div class="arrival-label">เวลาถึงโดยประมาณ:</div>
+                                    <div class="arrival-value" id="resultArrivalTimeMobile"> </div>
+                                </div>
+                                
+                                <!-- ส่วนแสดงผลค่าน้ำมัน -->
+                                <div id="fuelCostResultMobile" class="fuel-cost-section" style="display: none;">
+                                    <div class="fuel-cost-label">ค่าน้ำมันโดยประมาณ</div>
+                                    <div class="fuel-cost-value" id="resultFuelCostMobile">0 บาท</div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ปุ่มสลับโหมด -->
+        <div class="mode-toggle" id="modeToggle">
+            <i class="fas fa-exchange-alt"></i>
+        </div>
+    </div>
+
+    <script>
+        // ==============================================
+        // ระบบเลือกโหมดและการสลับโหมด
+        // ==============================================
+        
+        // อ้างอิง DOM elements
+        const modeSelection = document.getElementById('modeSelection');
+        const appContainer = document.getElementById('appContainer');
+        const desktopModeBtn = document.getElementById('desktopModeBtn');
+        const mobileModeBtn = document.getElementById('mobileModeBtn');
+        const desktopMode = document.getElementById('desktopMode');
+        const mobileMode = document.getElementById('mobileMode');
+        const modeToggle = document.getElementById('modeToggle');
+        const backToModeDesktop = document.getElementById('backToModeDesktop');
+        const backToModeMobile = document.getElementById('backToModeMobile');
+        
+        // ตรวจสอบว่าเคยเลือกโหมดไว้แล้วหรือไม่ (จาก localStorage)
+        let currentMode = localStorage.getItem('logitrip_mode') || null;
+        
+        // ถ้ามีโหมดที่เลือกไว้แล้ว ให้แสดงแอพทันที
+        if (currentMode) {
+            modeSelection.classList.add('hidden');
+            appContainer.classList.add('visible');
+            
+            if (currentMode === 'desktop') {
+                desktopMode.style.display = 'block';
+                mobileMode.style.display = 'none';
+                initDesktopApp();
+            } else {
+                desktopMode.style.display = 'none';
+                mobileMode.style.display = 'block';
+                initMobileApp();
+            }
+        }
+        
+        // เมื่อคลิกเลือกโหมดคอมพิวเตอร์
+        desktopModeBtn.addEventListener('click', () => {
+            selectMode('desktop');
+        });
+        
+        // เมื่อคลิกเลือกโหมดโทรศัพท์
+        mobileModeBtn.addEventListener('click', () => {
+            selectMode('mobile');
+        });
+        
+        // ฟังก์ชันเลือกโหมด
+        function selectMode(mode) {
+            currentMode = mode;
+            localStorage.setItem('logitrip_mode', mode);
+            
+            // ซ่อนหน้าจอเลือกโหมดและแสดงแอพ
+            modeSelection.classList.add('hidden');
+            appContainer.classList.add('visible');
+            
+            // แสดงโหมดที่เลือก
+            if (mode === 'desktop') {
+                desktopMode.style.display = 'block';
+                mobileMode.style.display = 'none';
+                initDesktopApp();
+            } else {
+                desktopMode.style.display = 'none';
+                mobileMode.style.display = 'block';
+                initMobileApp();
+            }
+        }
+        
+        // เมื่อคลิกปุ่มสลับโหมด
+        modeToggle.addEventListener('click', () => {
+            if (currentMode === 'desktop') {
+                selectMode('mobile');
+            } else {
+                selectMode('desktop');
+            }
+        });
+        
+        // เมื่อคลิกปุ่มย้อนกลับไปหน้าเลือกโหมด
+        backToModeDesktop.addEventListener('click', () => {
+            appContainer.classList.remove('visible');
+            modeSelection.classList.remove('hidden');
+        });
+        
+        backToModeMobile.addEventListener('click', () => {
+            appContainer.classList.remove('visible');
+            modeSelection.classList.remove('hidden');
+        });
+        
+        // ==============================================
+        // โค้ดสำหรับโหมดคอมพิวเตอร์
+        // ==============================================
+        
+        function initDesktopApp() {
+            // ข้อมูลจุดแวะพัก
+            let stops = [];
+            
+            // อ้างอิง DOM elements
+            const startPointInput = document.getElementById('startPoint');
+            const endPointInput = document.getElementById('endPoint');
+            const departureHourInput = document.getElementById('departureHour');
+            const departureMinuteInput = document.getElementById('departureMinute');
+            const travelHoursInput = document.getElementById('travelHours');
+            const travelMinutesInput = document.getElementById('travelMinutes');
+            const transportSelect = document.getElementById('transport');
+            const stopNameInput = document.getElementById('stopName');
+            const stopTimeInput = document.getElementById('stopTime');
+            const addStopBtn = document.getElementById('addStopBtn');
+            const clearStopsBtn = document.getElementById('clearStopsBtn');
+            const stopsList = document.getElementById('stopsList');
+            const emptyStopsMessage = document.getElementById('emptyStopsMessage');
+            const resetBtn = document.getElementById('resetBtn');
+            const copyResultsBtn = document.getElementById('copyResultsBtn');
+            
+            // ฟังก์ชันใหม่สำหรับการคำนวณค่าน้ำมัน
+            const useFuelCalcCheckbox = document.getElementById('useFuelCalc');
+            const fuelCostGroup = document.getElementById('fuelCostGroup');
+            const distanceInput = document.getElementById('distance');
+            const fuelConsumptionInput = document.getElementById('fuelConsumption');
+            const fuelTypeSelect = document.getElementById('fuelType');
+            
+            // ราคาน้ำมันจาก API
+            const price95Element = document.getElementById('price95');
+            const price91Element = document.getElementById('price91');
+            const priceDieselElement = document.getElementById('priceDiesel');
+            
+            // ผลลัพธ์ elements
+            const resultStart = document.getElementById('resultStart');
+            const resultEnd = document.getElementById('resultEnd');
+            const resultTransport = document.getElementById('resultTransport');
+            const resultDepartureTime = document.getElementById('resultDepartureTime');
+            const resultBaseTime = document.getElementById('resultBaseTime');
+            const resultStopsCount = document.getElementById('resultStopsCount');
+            const resultTotalStopTime = document.getElementById('resultTotalStopTime');
+            const resultTotalTime = document.getElementById('resultTotalTime');
+            const resultArrivalTime = document.getElementById('resultArrivalTime');
+            const fuelCostResult = document.getElementById('fuelCostResult');
+            const resultFuelCost = document.getElementById('resultFuelCost');
+            
+            // ราคาน้ำมันล่าสุด (ถ้าไม่สามารถดึงจาก API ได้จะใช้ราคาเริ่มต้น)
+            let fuelPrices = {
+                '95': 30.85,   // ราคาเบนซิน 95 ล่าสุด
+                '91': 30.48,   // ราคาเบนซิน 91 ล่าสุด
+                'diesel': 30.44, // ราคาดีเซลล่าสุด
+                'e20': 29.14,  // ราคา E20
+                'e85': 26.59   // ราคา E85
+            };
+            
+            // ฟังก์ชันแปลงนาทีเป็นรูปแบบ hh hr mm min
+            function minutesToHoursMinutes(totalMinutes) {
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                
+                if (hours === 0) {
+                    return `${minutes} min`;
+                } else if (minutes === 0) {
+                    return `${hours} hr`;
+                } else {
+                    return `${hours} hr ${minutes} min`;
+                }
+            }
+            
+            // ฟังก์ชันแปลงรูปแบบ hh:mm เป็นนาที
+            function timeToMinutes(hours, minutes) {
+                return (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+            }
+            
+            // ฟังก์ชันตรวจสอบและจัดรูปแบบค่าชั่วโมงและนาที
+            function validateTimeInput(hoursInput, minutesInput, maxHour = 99) {
+                let hours = parseInt(hoursInput.value) || 0;
+                let minutes = parseInt(minutesInput.value) || 0;
+                
+                // ตรวจสอบและปรับค่าหากเกินขีดจำกัด
+                if (minutes >= 60) {
+                    hours += Math.floor(minutes / 60);
+                    minutes = minutes % 60;
+                    minutesInput.value = minutes;
+                }
+                
+                if (hours > maxHour) {
+                    hours = maxHour;
+                    hoursInput.value = hours;
+                }
+                
+                // ตรวจสอบค่าติดลบ
+                if (hours < 0) {
+                    hours = 0;
+                    hoursInput.value = hours;
+                }
+                
+                if (minutes < 0) {
+                    minutes = 0;
+                    minutesInput.value = minutes;
+                }
+                
+                return { hours, minutes };
+            }
+            
+            // ฟังก์ชันจัดรูปแบบเวลาเป็น 2 หลัก
+            function formatTimeNumber(num) {
+                return num < 10 ? `0${num}` : `${num}`;
+            }
+            
+            // ฟังก์ชันคำนวณเวลาถึง
+            function calculateArrivalTime(departureHour, departureMinute, totalTravelMinutes) {
+                // แปลงเวลาออกเดินทางเป็นนาทีทั้งหมด
+                let departureTotalMinutes = departureHour * 60 + departureMinute;
+                
+                // เพิ่มเวลาการเดินทางทั้งหมด
+                let arrivalTotalMinutes = departureTotalMinutes + totalTravelMinutes;
+                
+                // คำนวณชั่วโมงและนาทีใหม่
+                let arrivalHour = Math.floor(arrivalTotalMinutes / 60) % 24;
+                let arrivalMinute = arrivalTotalMinutes % 60;
+                
+                // ถ้าวันถัดไป
+                let nextDay = Math.floor(arrivalTotalMinutes / (24 * 60));
+                let dayText = nextDay > 0 ? ` (+${nextDay} วัน)` : '';
+                
+                return {
+                    hour: arrivalHour,
+                    minute: arrivalMinute,
+                    formattedTime: `${formatTimeNumber(arrivalHour)}:${formatTimeNumber(arrivalMinute)}${dayText}`,
+                    nextDay: nextDay
+                };
+            }
+            
+            // ฟังก์ชันคำนวณค่าน้ำมัน
+            function calculateFuelCost(distanceKm, fuelConsumptionKmPerLiter, fuelType) {
+                if (distanceKm <= 0 || fuelConsumptionKmPerLiter <= 0) {
+                    return { cost: 0, detail: "" };
+                }
+                
+                // ราคาน้ำมันตามประเภท
+                const fuelPrice = fuelPrices[fuelType] || fuelPrices['95'];
+                
+                // คำนวณปริมาณน้ำมันที่ใช้ (ลิตร)
+                const fuelUsed = distanceKm / fuelConsumptionKmPerLiter;
+                
+                // คำนวณค่าน้ำมัน
+                const cost = fuelUsed * fuelPrice;
+                
+                // สร้างข้อความแสดงรายละเอียดการคำนวณ
+                const detail = `ระยะทาง ${distanceKm} กม. ÷ อัตราสิ้นเปลือง ${fuelConsumptionKmPerLiter} กม./ลิตร = ใช้ ${fuelUsed.toFixed(2)} ลิตร × ราคา ${fuelPrice.toFixed(2)} บาท/ลิตร`;
+                
+                return { 
+                    cost: cost,
+                    fuelUsed: fuelUsed,
+                    detail: detail
+                };
+            }
+            
+            // ฟังก์ชันดึงราคาน้ำมันจาก API (ใช้ข้อมูลจำลอง)
+            async function fetchFuelPrices() {
+                try {
+                    // ข้อมูลราคาน้ำมันจาก API จำลอง
+                    const mockPrices = {
+                        '95': 30.85,   
+                        '91': 30.48,   
+                        'diesel': 30.44, 
+                        'e20': 29.14,  
+                        'e85': 26.59  
+                    };
+                    
+                    // อัปเดตราคาน้ำมัน
+                    fuelPrices = mockPrices;
+                    
+                    // อัปเดตแสดงผลราคา
+                    price95Element.textContent = `${mockPrices['95'].toFixed(2)} บาท`;
+                    price91Element.textContent = `${mockPrices['91'].toFixed(2)} บาท`;
+                    priceDieselElement.textContent = `${mockPrices['diesel'].toFixed(2)} บาท`;
+                    
+                    console.log('อัปเดตราคาน้ำมันเรียบร้อยแล้ว');
+                    
+                } catch (error) {
+                    console.error('ไม่สามารถดึงราคาน้ำมันได้:', error);
+                    
+                    // แสดงราคาเริ่มต้นถ้าไม่สามารถดึงข้อมูลได้
+                    price95Element.textContent = `${fuelPrices['95'].toFixed(2)} บาท`;
+                    price91Element.textContent = `${fuelPrices['91'].toFixed(2)} บาท`;
+                    priceDieselElement.textContent = `${fuelPrices['diesel'].toFixed(2)} บาท`;
+                }
+            }
+            
+            // ฟังก์ชันเพิ่มจุดแวะพัก
+            function addStop() {
+                const stopName = stopNameInput.value.trim();
+                const stopTime = parseInt(stopTimeInput.value) || 0;
+                
+                if (!stopName) {
+                    alert('กรุณากรอกชื่อจุดแวะพัก');
+                    stopNameInput.focus();
+                    return;
+                }
+                
+                if (stopTime <= 0) {
+                    alert('กรุณากรอกเวลาแวะพักที่ถูกต้อง (มากกว่า 0 นาที)');
+                    stopTimeInput.focus();
+                    return;
+                }
+                
+                // เพิ่มจุดแวะพักในอาร์เรย์
+                const newStop = {
+                    id: Date.now(),
+                    name: stopName,
+                    time: stopTime
+                };
+                
+                stops.push(newStop);
+                
+                // รีเซ็ต input
+                stopNameInput.value = '';
+                stopTimeInput.value = '';
+                
+                // อัปเดตรายการจุดแวะพัก
+                updateStopsList();
+                
+                // คำนวณอัตโนมัติ
+                calculateTotalTime();
+                
+                // เลื่อนไปที่จุดแวะพักล่าสุด
+                setTimeout(() => {
+                    stopsList.scrollTop = stopsList.scrollHeight;
+                }, 100);
+            }
+            
+            // ฟังก์ชันอัปเดตรายการจุดแวะพัก
+            function updateStopsList() {
+                if (stops.length > 0) {
+                    emptyStopsMessage.style.display = 'none';
+                } else {
+                    emptyStopsMessage.style.display = 'block';
+                }
+                
+                stopsList.innerHTML = '';
+                stopsList.appendChild(emptyStopsMessage);
+                
+                stops.forEach(stop => {
+                    const stopElement = document.createElement('div');
+                    stopElement.className = 'stop-item';
+                    stopElement.innerHTML = `
+                        <div class="stop-details">
+                            <div class="stop-name">${stop.name}</div>
+                            <div class="stop-time">เวลาแวะพัก: ${stop.time} นาที</div>
+                        </div>
+                        <div class="stop-actions">
+                            <button class="btn btn-secondary edit-stop-btn" data-id="${stop.id}" title="แก้ไข">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger delete-stop-btn" data-id="${stop.id}" title="ลบ">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    stopsList.appendChild(stopElement);
+                });
+                
+                document.querySelectorAll('.edit-stop-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const stopId = parseInt(this.getAttribute('data-id'));
+                        editStop(stopId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-stop-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const stopId = parseInt(this.getAttribute('data-id'));
+                        deleteStop(stopId);
+                    });
+                });
+            }
+            
+            // ฟังก์ชันแก้ไขจุดแวะพัก
+            function editStop(stopId) {
+                const stopIndex = stops.findIndex(stop => stop.id === stopId);
+                
+                if (stopIndex !== -1) {
+                    const stop = stops[stopIndex];
+                    
+                    stopNameInput.value = stop.name;
+                    stopTimeInput.value = stop.time;
+                    
+                    stops.splice(stopIndex, 1);
+                    updateStopsList();
+                    calculateTotalTime();
+                    stopNameInput.focus();
+                }
+            }
+            
+            // ฟังก์ชันลบจุดแวะพัก
+            function deleteStop(stopId) {
+                if (confirm('คุณต้องการลบจุดแวะพักนี้ใช่หรือไม่?')) {
+                    stops = stops.filter(stop => stop.id !== stopId);
+                    updateStopsList();
+                    calculateTotalTime();
+                }
+            }
+            
+            // ฟังก์ชันคำนวณเวลาเดินทางทั้งหมด
+            function calculateTotalTime() {
+                const startPoint = startPointInput.value.trim();
+                const endPoint = endPointInput.value.trim();
+                const transport = transportSelect.options[transportSelect.selectedIndex].text;
+                
+                if (!startPoint || !endPoint) {
+                    alert('กรุณากรอกจุดเริ่มต้นและจุดหมายปลายทาง');
+                    return;
+                }
+                
+                // ตรวจสอบเวลาออกเดินทาง
+                const departureTime = validateTimeInput(departureHourInput, departureMinuteInput, 23);
+                const departureHour = departureTime.hours;
+                const departureMinute = departureTime.minutes;
+                
+                // แสดงเวลาออกเดินทาง
+                const formattedDepartureTime = departureHour === 0 && departureMinute === 0 ? 
+                    '' : `${formatTimeNumber(departureHour)}:${formatTimeNumber(departureMinute)}`;
+                resultDepartureTime.textContent = formattedDepartureTime;
+                
+                // ตรวจสอบเวลาเดินทาง
+                const travelTime = validateTimeInput(travelHoursInput, travelMinutesInput, 99);
+                const travelMinutes = timeToMinutes(travelTime.hours, travelTime.minutes);
+                
+                // คำนวณเวลาพักทั้งหมด
+                const totalStopTime = stops.reduce((sum, stop) => sum + stop.time, 0);
+                
+                // คำนวณเวลาทั้งหมด
+                const totalTimeMinutes = travelMinutes + totalStopTime;
+                
+                // คำนวณเวลาถึง
+                let arrivalTimeText = ':';
+                let arrivalTimeColor = '#1e3c72';
+                
+                if (departureHour !== 0 || departureMinute !== 0) {
+                    const arrivalTime = calculateArrivalTime(departureHour, departureMinute, totalTimeMinutes);
+                    arrivalTimeText = arrivalTime.formattedTime;
+                    
+                    // เปลี่ยนสีถ้าเป็นวันถัดไป
+                    if (arrivalTime.nextDay > 0) {
+                        arrivalTimeColor = '#dc3545';
+                    }
+                }
+                
+                // คำนวณค่าน้ำมันถ้าเลือกใช้
+                let fuelCost = 0;
+                let fuelDetail = "";
+                
+                if (useFuelCalcCheckbox.checked) {
+                    const distance = parseFloat(distanceInput.value) || 0;
+                    const fuelConsumption = parseFloat(fuelConsumptionInput.value) || 0;
+                    const fuelType = fuelTypeSelect.value;
+                    
+                    if (distance > 0 && fuelConsumption > 0) {
+                        const fuelResult = calculateFuelCost(distance, fuelConsumption, fuelType);
+                        fuelCost = fuelResult.cost;
+                        fuelDetail = fuelResult.detail;
+                        
+                        // แสดงผลค่าน้ำมัน
+                        fuelCostResult.style.display = 'block';
+                        resultFuelCost.textContent = `${fuelCost.toFixed(2)} บาท`;
+                    } else {
+                        fuelCostResult.style.display = 'none';
+                    }
+                } else {
+                    fuelCostResult.style.display = 'none';
+                }
+                
+                // แสดงผลลัพธ์
+                resultStart.textContent = startPoint;
+                resultEnd.textContent = endPoint;
+                resultTransport.textContent = transport;
+                resultBaseTime.textContent = minutesToHoursMinutes(travelMinutes);
+                resultStopsCount.textContent = stops.length;
+                resultTotalStopTime.textContent = minutesToHoursMinutes(totalStopTime);
+                resultTotalTime.textContent = minutesToHoursMinutes(totalTimeMinutes);
+                resultArrivalTime.textContent = arrivalTimeText;
+                resultArrivalTime.style.color = arrivalTimeColor;
+            }
+            
+            // ฟังก์ชันรีเซ็ตทั้งหมด
+            function resetAll() {
+                if (confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดใช่หรือไม่?')) {
+                    startPointInput.value = 'A';
+                    endPointInput.value = 'B';
+                    departureHourInput.value = '';
+                    departureMinuteInput.value = '';
+                    travelHoursInput.value = '';
+                    travelMinutesInput.value = '';
+                    distanceInput.value = '';
+                    fuelConsumptionInput.value = '';
+                    fuelTypeSelect.value = '95';
+                    useFuelCalcCheckbox.checked = false;
+                    fuelCostGroup.classList.remove('show');
+                    fuelCostResult.style.display = 'none';
+                    transportSelect.value = 'car';
+                    stopNameInput.value = '';
+                    stopTimeInput.value = '';
+                    
+                    stops = [];
+                    updateStopsList();
+                    calculateTotalTime();
+                    
+                    // เลื่อนไปด้านบน
+                    document.querySelector('.left-panel-content').scrollTop = 0;
+                }
+            }
+            
+            // ฟังก์ชันล้างจุดแวะพักทั้งหมด
+            function clearAllStops() {
+                if (stops.length === 0) {
+                    alert('ไม่มีจุดแวะพักให้ลบ');
+                    return;
+                }
+                
+                if (confirm('คุณต้องการลบจุดแวะพักทั้งหมดใช่หรือไม่?')) {
+                    stops = [];
+                    updateStopsList();
+                    calculateTotalTime();
+                }
+            }
+            
+            // ฟังก์ชันคัดลอกผลลัพธ์ไปยังคลิปบอร์ด
+            async function copyResultsToClipboard() {
+                try {
+                    // รวบรวมข้อมูลทั้งหมดจากผลลัพธ์
+                    const results = {
+                        startPoint: resultStart.textContent,
+                        endPoint: resultEnd.textContent,
+                        transport: resultTransport.textContent,
+                        departureTime: resultDepartureTime.textContent,
+                        baseTime: resultBaseTime.textContent,
+                        stopsCount: resultStopsCount.textContent,
+                        totalStopTime: resultTotalStopTime.textContent,
+                        totalTime: resultTotalTime.textContent,
+                        arrivalTime: resultArrivalTime.textContent,
+                        fuelCost: useFuelCalcCheckbox.checked ? resultFuelCost.textContent : null
+                    };
+                    
+                    // สร้างข้อความที่จัดรูปแบบ
+                    let formattedText = `LogiTrip - ผลการคำนวณเวลาเดินทาง\n`;
+                    formattedText += `==============================\n`;
+                    formattedText += `จุดเริ่มต้น: ${results.startPoint}\n`;
+                    formattedText += `จุดหมายปลายทาง: ${results.endPoint}\n`;
+                    formattedText += `วิธีการเดินทาง: ${results.transport}\n`;
+                    
+                    if (results.departureTime) {
+                        formattedText += `เวลาออกเดินทาง: ${results.departureTime}\n`;
+                    }
+                    
+                    formattedText += `เวลาเดินทางพื้นฐาน: ${results.baseTime}\n`;
+                    formattedText += `จำนวนจุดแวะพัก: ${results.stopsCount}\n`;
+                    formattedText += `เวลาพักทั้งหมด: ${results.totalStopTime}\n`;
+                    formattedText += `เวลาเดินทางทั้งหมด: ${results.totalTime}\n`;
+                    formattedText += `==============================\n`;
+                    
+                    if (results.arrivalTime) {
+                        formattedText += `เวลาถึงโดยประมาณ: ${results.arrivalTime}\n`;
+                    }
+                    
+                    if (results.fuelCost) {
+                        formattedText += `ค่าน้ำมันโดยประมาณ: ${results.fuelCost}\n`;
+                    }
+                    
+                    formattedText += `\nอัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
+                    
+                    // คัดลอกไปยังคลิปบอร์ด
+                    await navigator.clipboard.writeText(formattedText);
+                    
+                    // แสดงข้อความยืนยัน
+                    alert('คัดลอกผลลัพธ์ไปยังคลิปบอร์ดเรียบร้อยแล้ว!');
+                    
+                } catch (error) {
+                    console.error('เกิดข้อผิดพลาดในการคัดลอก:', error);
+                    alert('ไม่สามารถคัดลอกผลลัพธ์ได้ กรุณาลองอีกครั้ง');
+                }
+            }
+            
+            // ตั้งค่า event listeners
+            function setupEventListeners() {
+                addStopBtn.addEventListener('click', addStop);
+                clearStopsBtn.addEventListener('click', clearAllStops);
+                resetBtn.addEventListener('click', resetAll);
+                copyResultsBtn.addEventListener('click', copyResultsToClipboard);
+                
+                // Event listener สำหรับ checkbox การคำนวณค่าน้ำมัน
+                useFuelCalcCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        fuelCostGroup.classList.add('show');
+                    } else {
+                        fuelCostGroup.classList.remove('show');
+                        fuelCostResult.style.display = 'none';
+                    }
+                    calculateTotalTime();
+                });
+                
+                stopNameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') addStop();
+                });
+                
+                stopTimeInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') addStop();
+                });
+                
+                // เมื่อข้อมูลเปลี่ยนให้คำนวณใหม่
+                departureHourInput.addEventListener('change', function() {
+                    validateTimeInput(departureHourInput, departureMinuteInput, 23);
+                    calculateTotalTime();
+                });
+                
+                departureMinuteInput.addEventListener('change', function() {
+                    validateTimeInput(departureHourInput, departureMinuteInput, 23);
+                    calculateTotalTime();
+                });
+                
+                travelMinutesInput.addEventListener('change', function() {
+                    validateTimeInput(travelHoursInput, travelMinutesInput, 99);
+                    calculateTotalTime();
+                });
+                
+                travelHoursInput.addEventListener('change', function() {
+                    validateTimeInput(travelHoursInput, travelMinutesInput, 99);
+                    calculateTotalTime();
+                });
+                
+                distanceInput.addEventListener('input', function() {
+                    if (useFuelCalcCheckbox.checked) {
+                        calculateTotalTime();
+                    }
+                });
+                
+                fuelConsumptionInput.addEventListener('input', function() {
+                    if (useFuelCalcCheckbox.checked) {
+                        calculateTotalTime();
+                    }
+                });
+                
+                fuelTypeSelect.addEventListener('change', function() {
+                    if (useFuelCalcCheckbox.checked) {
+                        calculateTotalTime();
+                    }
+                });
+                
+                startPointInput.addEventListener('input', calculateTotalTime);
+                endPointInput.addEventListener('input', calculateTotalTime);
+                transportSelect.addEventListener('change', calculateTotalTime);
+            }
+            
+            // เริ่มต้นแอพ
+            function initApp() {
+                setupEventListeners();
+                updateStopsList();
+                
+                // ดึงราคาน้ำมันล่าสุด
+                fetchFuelPrices();
+                
+                // อัปเดตราคาน้ำมันทุก 5 นาที
+                setInterval(fetchFuelPrices, 5 * 60 * 1000);
+                
+                calculateTotalTime();
+            }
+            
+            // เริ่มต้นแอพพลิเคชัน
+            initApp();
+        }
+        
+        // ==============================================
+        // โค้ดสำหรับโหมดโทรศัพท์ (คล้ายกับคอมพิวเตอร์แต่แยกกัน)
+        // ==============================================
+        
+        function initMobileApp() {
+            // ข้อมูลจุดแวะพัก
+            let stops = [];
+            
+            // อ้างอิง DOM elements
+            const startPointInput = document.getElementById('startPointMobile');
+            const endPointInput = document.getElementById('endPointMobile');
+            const departureHourInput = document.getElementById('departureHourMobile');
+            const departureMinuteInput = document.getElementById('departureMinuteMobile');
+            const travelHoursInput = document.getElementById('travelHoursMobile');
+            const travelMinutesInput = document.getElementById('travelMinutesMobile');
+            const transportSelect = document.getElementById('transportMobile');
+            const stopNameInput = document.getElementById('stopNameMobile');
+            const stopTimeInput = document.getElementById('stopTimeMobile');
+            const addStopBtn = document.getElementById('addStopBtnMobile');
+            const clearStopsBtn = document.getElementById('clearStopsBtnMobile');
+            const stopsList = document.getElementById('stopsListMobile');
+            const emptyStopsMessage = document.getElementById('emptyStopsMessageMobile');
+            const resetBtn = document.getElementById('resetBtnMobile');
+            const copyResultsBtn = document.getElementById('copyResultsBtnMobile');
+            
+            // ฟังก์ชันใหม่สำหรับการคำนวณค่าน้ำมัน
+            const useFuelCalcCheckbox = document.getElementById('useFuelCalcMobile');
+            const fuelCostGroup = document.getElementById('fuelCostGroupMobile');
+            const distanceInput = document.getElementById('distanceMobile');
+            const fuelConsumptionInput = document.getElementById('fuelConsumptionMobile');
+            const fuelTypeSelect = document.getElementById('fuelTypeMobile');
+            
+            // ราคาน้ำมันจาก API
+            const price95Element = document.getElementById('price95Mobile');
+            const price91Element = document.getElementById('price91Mobile');
+            const priceDieselElement = document.getElementById('priceDieselMobile');
+            
+            // ผลลัพธ์ elements
+            const resultStart = document.getElementById('resultStartMobile');
+            const resultEnd = document.getElementById('resultEndMobile');
+            const resultTransport = document.getElementById('resultTransportMobile');
+            const resultDepartureTime = document.getElementById('resultDepartureTimeMobile');
+            const resultBaseTime = document.getElementById('resultBaseTimeMobile');
+            const resultStopsCount = document.getElementById('resultStopsCountMobile');
+            const resultTotalStopTime = document.getElementById('resultTotalStopTimeMobile');
+            const resultTotalTime = document.getElementById('resultTotalTimeMobile');
+            const resultArrivalTime = document.getElementById('resultArrivalTimeMobile');
+            const fuelCostResult = document.getElementById('fuelCostResultMobile');
+            const resultFuelCost = document.getElementById('resultFuelCostMobile');
+            
+            // ราคาน้ำมันล่าสุด (ถ้าไม่สามารถดึงจาก API ได้จะใช้ราคาเริ่มต้น)
+            let fuelPrices = {
+                '95': 30.85,   // ราคาเบนซิน 95 ล่าสุด
+                '91': 30.48,   // ราคาเบนซิน 91 ล่าสุด
+                'diesel': 30.44, // ราคาดีเซลล่าสุด
+                'e20': 29.14,  // ราคา E20
+                'e85': 26.59   // ราคา E85
+            };
+            
+            // ฟังก์ชันแปลงนาทีเป็นรูปแบบ hh hr mm min
+            function minutesToHoursMinutes(totalMinutes) {
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                
+                if (hours === 0) {
+                    return `${minutes} min`;
+                } else if (minutes === 0) {
+                    return `${hours} hr`;
+                } else {
+                    return `${hours} hr ${minutes} min`;
+                }
+            }
+            
+            // ฟังก์ชันแปลงรูปแบบ hh:mm เป็นนาที
+            function timeToMinutes(hours, minutes) {
+                return (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+            }
+            
+            // ฟังก์ชันตรวจสอบและจัดรูปแบบค่าชั่วโมงและนาที
+            function validateTimeInput(hoursInput, minutesInput, maxHour = 99) {
+                let hours = parseInt(hoursInput.value) || 0;
+                let minutes = parseInt(minutesInput.value) || 0;
+                
+                // ตรวจสอบและปรับค่าหากเกินขีดจำกัด
+                if (minutes >= 60) {
+                    hours += Math.floor(minutes / 60);
+                    minutes = minutes % 60;
+                    minutesInput.value = minutes;
+                }
+                
+                if (hours > maxHour) {
+                    hours = maxHour;
+                    hoursInput.value = hours;
+                }
+                
+                // ตรวจสอบค่าติดลบ
+                if (hours < 0) {
+                    hours = 0;
+                    hoursInput.value = hours;
+                }
+                
+                if (minutes < 0) {
+                    minutes = 0;
+                    minutesInput.value = minutes;
+                }
+                
+                return { hours, minutes };
+            }
+            
+            // ฟังก์ชันจัดรูปแบบเวลาเป็น 2 หลัก
+            function formatTimeNumber(num) {
+                return num < 10 ? `0${num}` : `${num}`;
+            }
+            
+            // ฟังก์ชันคำนวณเวลาถึง
+            function calculateArrivalTime(departureHour, departureMinute, totalTravelMinutes) {
+                // แปลงเวลาออกเดินทางเป็นนาทีทั้งหมด
+                let departureTotalMinutes = departureHour * 60 + departureMinute;
+                
+                // เพิ่มเวลาการเดินทางทั้งหมด
+                let arrivalTotalMinutes = departureTotalMinutes + totalTravelMinutes;
+                
+                // คำนวณชั่วโมงและนาทีใหม่
+                let arrivalHour = Math.floor(arrivalTotalMinutes / 60) % 24;
+                let arrivalMinute = arrivalTotalMinutes % 60;
+                
+                // ถ้าวันถัดไป
+                let nextDay = Math.floor(arrivalTotalMinutes / (24 * 60));
+                let dayText = nextDay > 0 ? ` (+${nextDay} วัน)` : '';
+                
+                return {
+                    hour: arrivalHour,
+                    minute: arrivalMinute,
+                    formattedTime: `${formatTimeNumber(arrivalHour)}:${formatTimeNumber(arrivalMinute)}${dayText}`,
+                    nextDay: nextDay
+                };
+            }
+            
+            // ฟังก์ชันคำนวณค่าน้ำมัน
+            function calculateFuelCost(distanceKm, fuelConsumptionKmPerLiter, fuelType) {
+                if (distanceKm <= 0 || fuelConsumptionKmPerLiter <= 0) {
+                    return { cost: 0, detail: "" };
+                }
+                
+                // ราคาน้ำมันตามประเภท
+                const fuelPrice = fuelPrices[fuelType] || fuelPrices['95'];
+                
+                // คำนวณปริมาณน้ำมันที่ใช้ (ลิตร)
+                const fuelUsed = distanceKm / fuelConsumptionKmPerLiter;
+                
+                // คำนวณค่าน้ำมัน
+                const cost = fuelUsed * fuelPrice;
+                
+                // สร้างข้อความแสดงรายละเอียดการคำนวณ
+                const detail = `ระยะทาง ${distanceKm} กม. ÷ อัตราสิ้นเปลือง ${fuelConsumptionKmPerLiter} กม./ลิตร = ใช้ ${fuelUsed.toFixed(2)} ลิตร × ราคา ${fuelPrice.toFixed(2)} บาท/ลิตร`;
+                
+                return { 
+                    cost: cost,
+                    fuelUsed: fuelUsed,
+                    detail: detail
+                };
+            }
+            
+            // ฟังก์ชันดึงราคาน้ำมันจาก API (ใช้ข้อมูลจำลอง)
+            async function fetchFuelPrices() {
+                try {
+                    // ข้อมูลราคาน้ำมันจาก API จำลอง
+                    const mockPrices = {
+                        '95': 30.85,   
+                        '91': 30.48,   
+                        'diesel': 30.44, 
+                        'e20': 29.14,  
+                        'e85': 26.59  
+                    };
+                    
+                    // อัปเดตราคาน้ำมัน
+                    fuelPrices = mockPrices;
+                    
+                    // อัปเดตแสดงผลราคา
+                    price95Element.textContent = `${mockPrices['95'].toFixed(2)} บาท`;
+                    price91Element.textContent = `${mockPrices['91'].toFixed(2)} บาท`;
+                    priceDieselElement.textContent = `${mockPrices['diesel'].toFixed(2)} บาท`;
+                    
+                    console.log('อัปเดตราคาน้ำมันเรียบร้อยแล้ว');
+                    
+                } catch (error) {
+                    console.error('ไม่สามารถดึงราคาน้ำมันได้:', error);
+                    
+                    // แสดงราคาเริ่มต้นถ้าไม่สามารถดึงข้อมูลได้
+                    price95Element.textContent = `${fuelPrices['95'].toFixed(2)} บาท`;
+                    price91Element.textContent = `${fuelPrices['91'].toFixed(2)} บาท`;
+                    priceDieselElement.textContent = `${fuelPrices['diesel'].toFixed(2)} บาท`;
+                }
+            }
+            
+            // ฟังก์ชันเพิ่มจุดแวะพัก
+            function addStop() {
+                const stopName = stopNameInput.value.trim();
+                const stopTime = parseInt(stopTimeInput.value) || 0;
+                
+                if (!stopName) {
+                    alert('กรุณากรอกชื่อจุดแวะพัก');
+                    stopNameInput.focus();
+                    return;
+                }
+                
+                if (stopTime <= 0) {
+                    alert('กรุณากรอกเวลาแวะพักที่ถูกต้อง (มากกว่า 0 นาที)');
+                    stopTimeInput.focus();
+                    return;
+                }
+                
+                // เพิ่มจุดแวะพักในอาร์เรย์
+                const newStop = {
+                    id: Date.now(),
+                    name: stopName,
+                    time: stopTime
+                };
+                
+                stops.push(newStop);
+                
+                // รีเซ็ต input
+                stopNameInput.value = '';
+                stopTimeInput.value = '';
+                
+                // อัปเดตรายการจุดแวะพัก
+                updateStopsList();
+                
+                // คำนวณอัตโนมัติ
+                calculateTotalTime();
+                
+                // เลื่อนไปที่จุดแวะพักล่าสุด
+                setTimeout(() => {
+                    stopsList.scrollTop = stopsList.scrollHeight;
+                }, 100);
+            }
+            
+            // ฟังก์ชันอัปเดตรายการจุดแวะพัก
+            function updateStopsList() {
+                if (stops.length > 0) {
+                    emptyStopsMessage.style.display = 'none';
+                } else {
+                    emptyStopsMessage.style.display = 'block';
+                }
+                
+                stopsList.innerHTML = '';
+                stopsList.appendChild(emptyStopsMessage);
+                
+                stops.forEach(stop => {
+                    const stopElement = document.createElement('div');
+                    stopElement.className = 'stop-item';
+                    stopElement.innerHTML = `
+                        <div class="stop-details">
+                            <div class="stop-name">${stop.name}</div>
+                            <div class="stop-time">เวลาแวะพัก: ${stop.time} นาที</div>
+                        </div>
+                        <div class="stop-actions">
+                            <button class="btn btn-secondary edit-stop-btn" data-id="${stop.id}" title="แก้ไข">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger delete-stop-btn" data-id="${stop.id}" title="ลบ">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    stopsList.appendChild(stopElement);
+                });
+                
+                document.querySelectorAll('.edit-stop-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const stopId = parseInt(this.getAttribute('data-id'));
+                        editStop(stopId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-stop-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const stopId = parseInt(this.getAttribute('data-id'));
+                        deleteStop(stopId);
+                    });
+                });
+            }
+            
+            // ฟังก์ชันแก้ไขจุดแวะพัก
+            function editStop(stopId) {
+                const stopIndex = stops.findIndex(stop => stop.id === stopId);
+                
+                if (stopIndex !== -1) {
+                    const stop = stops[stopIndex];
+                    
+                    stopNameInput.value = stop.name;
+                    stopTimeInput.value = stop.time;
+                    
+                    stops.splice(stopIndex, 1);
+                    updateStopsList();
+                    calculateTotalTime();
+                    stopNameInput.focus();
+                }
+            }
+            
+            // ฟังก์ชันลบจุดแวะพัก
+            function deleteStop(stopId) {
+                if (confirm('คุณต้องการลบจุดแวะพักนี้ใช่หรือไม่?')) {
+                    stops = stops.filter(stop => stop.id !== stopId);
+                    updateStopsList();
+                    calculateTotalTime();
+                }
+            }
+            
+            // ฟังก์ชันคำนวณเวลาเดินทางทั้งหมด
+            function calculateTotalTime() {
+                const startPoint = startPointInput.value.trim();
+                const endPoint = endPointInput.value.trim();
+                const transport = transportSelect.options[transportSelect.selectedIndex].text;
+                
+                if (!startPoint || !endPoint) {
+                    alert('กรุณากรอกจุดเริ่มต้นและจุดหมายปลายทาง');
+                    return;
+                }
+                
+                // ตรวจสอบเวลาออกเดินทาง
+                const departureTime = validateTimeInput(departureHourInput, departureMinuteInput, 23);
+                const departureHour = departureTime.hours;
+                const departureMinute = departureTime.minutes;
+                
+                // แสดงเวลาออกเดินทาง
+                const formattedDepartureTime = departureHour === 0 && departureMinute === 0 ? 
+                    '' : `${formatTimeNumber(departureHour)}:${formatTimeNumber(departureMinute)}`;
+                resultDepartureTime.textContent = formattedDepartureTime;
+                
+                // ตรวจสอบเวลาเดินทาง
+                const travelTime = validateTimeInput(travelHoursInput, travelMinutesInput, 99);
+                const travelMinutes = timeToMinutes(travelTime.hours, travelTime.minutes);
+                
+                // คำนวณเวลาพักทั้งหมด
+                const totalStopTime = stops.reduce((sum, stop) => sum + stop.time, 0);
+                
+                // คำนวณเวลาทั้งหมด
+                const totalTimeMinutes = travelMinutes + totalStopTime;
+                
+                // คำนวณเวลาถึง
+                let arrivalTimeText = ':';
+                let arrivalTimeColor = '#1e3c72';
+                
+                if (departureHour !== 0 || departureMinute !== 0) {
+                    const arrivalTime = calculateArrivalTime(departureHour, departureMinute, totalTimeMinutes);
+                    arrivalTimeText = arrivalTime.formattedTime;
+                    
+                    // เปลี่ยนสีถ้าเป็นวันถัดไป
+                    if (arrivalTime.nextDay > 0) {
+                        arrivalTimeColor = '#dc3545';
+                    }
+                }
+                
+                // คำนวณค่าน้ำมันถ้าเลือกใช้
+                let fuelCost = 0;
+                let fuelDetail = "";
+                
+                if (useFuelCalcCheckbox.checked) {
+                    const distance = parseFloat(distanceInput.value) || 0;
+                    const fuelConsumption = parseFloat(fuelConsumptionInput.value) || 0;
+                    const fuelType = fuelTypeSelect.value;
+                    
+                    if (distance > 0 && fuelConsumption > 0) {
+                        const fuelResult = calculateFuelCost(distance, fuelConsumption, fuelType);
+                        fuelCost = fuelResult.cost;
+                        fuelDetail = fuelResult.detail;
+                        
+                        // แสดงผลค่าน้ำมัน
+                        fuelCostResult.style.display = 'block';
+                        resultFuelCost.textContent = `${fuelCost.toFixed(2)} บาท`;
+                    } else {
+                        fuelCostResult.style.display = 'none';
+                    }
+                } else {
+                    fuelCostResult.style.display = 'none';
+                }
+                
+                // แสดงผลลัพธ์
+                resultStart.textContent = startPoint;
+                resultEnd.textContent = endPoint;
+                resultTransport.textContent = transport;
+                resultBaseTime.textContent = minutesToHoursMinutes(travelMinutes);
+                resultStopsCount.textContent = stops.length;
+                resultTotalStopTime.textContent = minutesToHoursMinutes(totalStopTime);
+                resultTotalTime.textContent = minutesToHoursMinutes(totalTimeMinutes);
+                resultArrivalTime.textContent = arrivalTimeText;
+                resultArrivalTime.style.color = arrivalTimeColor;
+            }
+            
+            // ฟังก์ชันรีเซ็ตทั้งหมด
+            function resetAll() {
+                if (confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดใช่หรือไม่?')) {
+                    startPointInput.value = 'A';
+                    endPointInput.value = 'B';
+                    departureHourInput.value = '';
+                    departureMinuteInput.value = '';
+                    travelHoursInput.value = '';
+                    travelMinutesInput.value = '';
+                    distanceInput.value = '';
+                    fuelConsumptionInput.value = '';
+                    fuelTypeSelect.value = '95';
+                    useFuelCalcCheckbox.checked = false;
+                    fuelCostGroup.classList.remove('show');
+                    fuelCostResult.style.display = 'none';
+                    transportSelect.value = 'car';
+                    stopNameInput.value = '';
+                    stopTimeInput.value = '';
+                    
+                    stops = [];
+                    updateStopsList();
+                    calculateTotalTime();
+                    
+                    // เลื่อนไปด้านบน
+                    document.querySelector('.left-panel-content').scrollTop = 0;
+                }
+            }
+            
+            // ฟังก์ชันล้างจุดแวะพักทั้งหมด
+            function clearAllStops() {
+                if (stops.length === 0) {
+                    alert('ไม่มีจุดแวะพักให้ลบ');
+                    return;
+                }
+                
+                if (confirm('คุณต้องการลบจุดแวะพักทั้งหมดใช่หรือไม่?')) {
+                    stops = [];
+                    updateStopsList();
+                    calculateTotalTime();
+                }
+            }
+            
+            // ฟังก์ชันคัดลอกผลลัพธ์ไปยังคลิปบอร์ด
+            async function copyResultsToClipboard() {
+                try {
+                    // รวบรวมข้อมูลทั้งหมดจากผลลัพธ์
+                    const results = {
+                        startPoint: resultStart.textContent,
+                        endPoint: resultEnd.textContent,
+                        transport: resultTransport.textContent,
+                        departureTime: resultDepartureTime.textContent,
+                        baseTime: resultBaseTime.textContent,
+                        stopsCount: resultStopsCount.textContent,
+                        totalStopTime: resultTotalStopTime.textContent,
+                        totalTime: resultTotalTime.textContent,
+                        arrivalTime: resultArrivalTime.textContent,
+                        fuelCost: useFuelCalcCheckbox.checked ? resultFuelCost.textContent : null
+                    };
+                    
+                    // สร้างข้อความที่จัดรูปแบบ
+                    let formattedText = `LogiTrip - ผลการคำนวณเวลาเดินทาง\n`;
+                    formattedText += `==============================\n`;
+                    formattedText += `จุดเริ่มต้น: ${results.startPoint}\n`;
+                    formattedText += `จุดหมายปลายทาง: ${results.endPoint}\n`;
+                    formattedText += `วิธีการเดินทาง: ${results.transport}\n`;
+                    
+                    if (results.departureTime) {
+                        formattedText += `เวลาออกเดินทาง: ${results.departureTime}\n`;
+                    }
+                    
+                    formattedText += `เวลาเดินทางพื้นฐาน: ${results.baseTime}\n`;
+                    formattedText += `จำนวนจุดแวะพัก: ${results.stopsCount}\n`;
+                    formattedText += `เวลาพักทั้งหมด: ${results.totalStopTime}\n`;
+                    formattedText += `เวลาเดินทางทั้งหมด: ${results.totalTime}\n`;
+                    formattedText += `==============================\n`;
+                    
+                    if (results.arrivalTime) {
+                        formattedText += `เวลาถึงโดยประมาณ: ${results.arrivalTime}\n`;
+                    }
+                    
+                    if (results.fuelCost) {
+                        formattedText += `ค่าน้ำมันโดยประมาณ: ${results.fuelCost}\n`;
+                    }
+                    
+                    formattedText += `\nอัปเดตเมื่อ: ${new Date().toLocaleString('th-TH')}`;
+                    
+                    // คัดลอกไปยังคลิปบอร์ด
+                    await navigator.clipboard.writeText(formattedText);
+                    
+                    // แสดงข้อความยืนยัน
+                    alert('คัดลอกผลลัพธ์ไปยังคลิปบอร์ดเรียบร้อยแล้ว!');
+                    
+                } catch (error) {
+                    console.error('เกิดข้อผิดพลาดในการคัดลอก:', error);
+                    alert('ไม่สามารถคัดลอกผลลัพธ์ได้ กรุณาลองอีกครั้ง');
+                }
+            }
+            
+            // ตั้งค่า event listeners
+            function setupEventListeners() {
+                addStopBtn.addEventListener('click', addStop);
+                clearStopsBtn.addEventListener('click', clearAllStops);
+                resetBtn.addEventListener('click', resetAll);
+                copyResultsBtn.addEventListener('click', copyResultsToClipboard);
+                
+                // Event listener สำหรับ checkbox การคำนวณค่าน้ำมัน
+                useFuelCalcCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        fuelCostGroup.classList.add('show');
+                    } else {
+                        fuelCostGroup.classList.remove('show');
+                        fuelCostResult.style.display = 'none';
+                    }
+                    calculateTotalTime();
+                });
+                
+                stopNameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') addStop();
+                });
+                
+                stopTimeInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') addStop();
+                });
+                
+                // เมื่อข้อมูลเปลี่ยนให้คำนวณใหม่
+                departureHourInput.addEventListener('change', function() {
+                    validateTimeInput(departureHourInput, departureMinuteInput, 23);
+                    calculateTotalTime();
+                });
+                
+                departureMinuteInput.addEventListener('change', function() {
+                    validateTimeInput(departureHourInput, departureMinuteInput, 23);
+                    calculateTotalTime();
+                });
+                
+                travelMinutesInput.addEventListener('change', function() {
+                    validateTimeInput(travelHoursInput, travelMinutesInput, 99);
+                    calculateTotalTime();
+                });
+                
+                travelHoursInput.addEventListener('change', function() {
+                    validateTimeInput(travelHoursInput, travelMinutesInput, 99);
+                    calculateTotalTime();
+                });
+                
+                distanceInput.addEventListener('input', function() {
+                    if (useFuelCalcCheckbox.checked) {
+                        calculateTotalTime();
+                    }
+                });
+                
+                fuelConsumptionInput.addEventListener('input', function() {
+                    if (useFuelCalcCheckbox.checked) {
+                        calculateTotalTime();
+                    }
+                });
+                
+                fuelTypeSelect.addEventListener('change', function() {
+                    if (useFuelCalcCheckbox.checked) {
+                        calculateTotalTime();
+                    }
+                });
+                
+                startPointInput.addEventListener('input', calculateTotalTime);
+                endPointInput.addEventListener('input', calculateTotalTime);
+                transportSelect.addEventListener('change', calculateTotalTime);
+            }
+            
+            // เริ่มต้นแอพ
+            function initApp() {
+                setupEventListeners();
+                updateStopsList();
+                
+                // ดึงราคาน้ำมันล่าสุด
+                fetchFuelPrices();
+                
+                // อัปเดตราคาน้ำมันทุก 5 นาที
+                setInterval(fetchFuelPrices, 5 * 60 * 1000);
+                
+                calculateTotalTime();
+            }
+            
+            // เริ่มต้นแอพพลิเคชัน
+            initApp();
+        }
+        
+        // ถ้าเปิดเว็บในโทรศัพท์และยังไม่ได้เลือกโหมด แนะนำให้ใช้โหมดโทรศัพท์
+        if (!currentMode && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            setTimeout(() => {
+                if (!currentMode) {
+                    const suggestion = confirm("ตรวจพบว่าคุณกำลังใช้โทรศัพท์ แนะนำให้ใช้โหมดโทรศัพท์เพื่อประสบการณ์ที่ดีที่สุด\n\nกด 'ตกลง' เพื่อเลือกโหมดโทรศัพท์ หรือ 'ยกเลิก' เพื่อเลือกด้วยตัวเอง");
+                    if (suggestion) {
+                        selectMode('mobile');
+                    }
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
